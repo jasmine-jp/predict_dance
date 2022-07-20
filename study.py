@@ -44,9 +44,9 @@ class Study:
         print(f'Sum: {presum}, Ans: {list(ans)}')
     
     def create_randrange(self):
-        r = np.random.randint(0, len(self.data)-1, self.batch)
+        r = np.random.randint(0, len(self.data), self.batch)
         idx = np.array(list(map(lambda e: np.argmin(np.abs(self.plot-e)), r)))
-        trainE = np.array(list(map(lambda e, i: e-arr_size if e-self.plot[i] < arr_size else e, r, idx)))
+        trainE = np.array(list(map(lambda e, i: e-arr_size if 0<e-self.plot[i]<arr_size else e, r, idx)))
         trainNum = np.array(list(map(lambda e: [n+e for n in range(arr_size)], trainE)))
         teachNum = np.array(list(map(lambda e, i: e-(i if e < self.plot[i] else i+1)*arr_size, trainE, idx)))
         return torch.Tensor(self.data[trainNum]), torch.Tensor(self.teach[teachNum])

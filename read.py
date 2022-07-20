@@ -41,7 +41,7 @@ def all_read(name):
             data = arr if data.size == 0 else np.append(data, arr, axis=0)
             teach = np.array([ansmap.get(s.split('_')[-1].replace('.mp4', ''), other) for _ in range(len(arr)-arr_size)])
             teachs = teach if teachs.size == 0 else np.append(teachs, teach, axis=0)
-            plot = np.append(plot, len(data)-arr_size-1)
+            plot = np.append(plot, len(data)-arr_size)
         with open('out/{}_read.pkl'.format(name), 'wb') as f:
             print('dumping '+'out/{}_read.pkl'.format(name))
             pickle.dump((data, teachs, plot), f)

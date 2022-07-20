@@ -1,6 +1,7 @@
 import torch
 from torch import nn
-from common import arr_size, channels, kernel, stride, pool, ansmap
+from common import *
+hidden = 10
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
@@ -9,17 +10,19 @@ class NeuralNetwork(nn.Module):
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channels, kernel, stride),
             nn.ReLU(),
-            nn.MaxPool2d(pool)
+            nn.AvgPool2d(pool),
+            nn.Flatten()
         )
 
-        self.conv3d = nn.Sequential(
-            nn.Conv3d(arr_size, channels, 2, 2),
-            nn.ReLU()
+        self.cnn = nn.LSTM(
+            input_size = int(node/arr_size),
+            hidden_size = hidden,
+            batch_first = True
         )
 
         self.stack = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(1250, 512),
+            nn.Linear(arr_size*hidden, 512),
             nn.ReLU(),
             nn.Linear(512, 512),
             nn.ReLU(),
@@ -29,6 +32,6 @@ class NeuralNetwork(nn.Module):
     
     def forward(self, x):
         x = torch.stack(list(map(lambda e: self.conv2d(e), x)))
-        x = self.conv3d(x)
+        x, _ = self.cnn(x, None)
         x = self.stack(x)
         return x
