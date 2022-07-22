@@ -35,9 +35,9 @@ def read(name, terdir):
 def all_read(name):
     if input('update data [y/n]: ') == 'y':
         data, teachs, plot = np.array([]), np.array([]), np.array([])
+        other = [0 for _ in range(len(ansmap))]+[1]
         for s in os.listdir(name):
             arr = read(s, name)
-            other = [0 for _ in range(len(ansmap))]+[1]
             data = arr if data.size == 0 else np.append(data, arr, axis=0)
             teach = np.array([ansmap.get(s.split('_')[-1].replace('.mp4', ''), other) for _ in range(len(arr)-arr_size)])
             teachs = teach if teachs.size == 0 else np.append(teachs, teach, axis=0)

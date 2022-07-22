@@ -7,10 +7,9 @@ from common import arr_size, ansmap
 class Study:
     def __init__(self, model, read, batch, diff):
         self.loss_fn = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
-        self.model = model
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=5e-6)
+        self.model, self.batch = model, batch
         self.data, self.teach, self.plot = read
-        self.batch = batch
         self.diff = np.array([len(self.data)-arr_size*len(self.plot)-diff, diff])/self.batch
 
     def train(self):
@@ -47,6 +46,6 @@ class Study:
         r = np.random.randint(0, len(self.data), self.batch)
         idx = np.array(list(map(lambda e: np.argmin(np.abs(self.plot-e)), r)))
         trainE = np.array(list(map(lambda e, i: e-arr_size if 0<e-self.plot[i]<arr_size else e, r, idx)))
-        trainNum = np.array(list(map(lambda e: [n+e for n in range(arr_size)], trainE)))
+        trainNum = np.array(list(map(lambda e: np.arange(e, e+arr_size), trainE)))
         teachNum = np.array(list(map(lambda e, i: e-(i if e < self.plot[i] else i+1)*arr_size, trainE, idx)))
         return torch.Tensor(self.data[trainNum]), torch.Tensor(self.teach[teachNum])

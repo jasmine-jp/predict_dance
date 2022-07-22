@@ -4,13 +4,11 @@ from study import Study
 from read import test_read
 import torchinfo
 from common import arr_size, size
-
-read = test_read()
+# print('Input Size:', 10, arr_size, 3, size, size)
+# torchinfo.summary(NeuralNetwork(), (10, arr_size, 3, size, size))
 
 model = NeuralNetwork()
-#torchinfo.summary(model, (10, arr_size, 3, size, size))
-study = Study(model, read, 10, 750)
-
+study = Study(model, test_read(), 10, 750)
 
 model.load_state_dict(torch.load('out/model_weights.pth'))
 
