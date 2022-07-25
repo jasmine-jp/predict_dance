@@ -7,7 +7,7 @@ from common import arr_size, ansmap
 class Study:
     def __init__(self, model, read, batch, diff):
         self.loss_fn = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-5, weight_decay=1e-4)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-4, weight_decay=1e-4)
         self.model, self.batch = model, batch
         self.data, self.teach, self.plot = read
         self.diff = np.array([len(self.teach)-diff, diff])/self.batch
