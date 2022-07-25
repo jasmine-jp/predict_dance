@@ -7,10 +7,10 @@ from common import arr_size, ansmap
 class Study:
     def __init__(self, model, read, batch, diff):
         self.loss_fn = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=5e-6)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4, eps=1e-5, weight_decay=1e-4)
         self.model, self.batch = model, batch
         self.data, self.teach, self.plot = read
-        self.diff = np.array([len(self.data)-arr_size*len(self.plot)-diff, diff])/self.batch
+        self.diff = np.array([len(self.teach)-diff, diff])/self.batch
 
     def train(self):
         print('train')
@@ -24,7 +24,7 @@ class Study:
             self.optimizer.step()
 
     def test(self):
-        test_loss, self.correct, presum, ans = 0, 0, [0 for _ in range(len(ansmap)+1)], np.array([])
+        test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
         print('test')
         with torch.no_grad():
             for _ in tqdm(range(int(self.diff[1]))):

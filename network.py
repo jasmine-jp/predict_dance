@@ -21,22 +21,21 @@ class NeuralNetwork(nn.Module):
 
         self.rnn = nn.LSTM(
             input_size = 1,
-            hidden_size = arr_size,
-            num_layers = 2,
+            hidden_size = 64,
             batch_first = True
         )
 
         self.stack = nn.Sequential(
-            nn.Linear(arr_size, 64),
+            nn.Linear(64, 16),
             nn.ReLU(),
-            nn.Linear(64, 32),
+            nn.Linear(16, 16),
             nn.ReLU(),
-            nn.Linear(32, len(ansmap)+1),
+            nn.Linear(16, len(ansmap)+1),
             nn.Softmax(1)
         )
     
     def forward(self, x):
-        x = torch.stack(list(map(lambda e: self.conv2d(e), x)))
+        x = torch.stack(list(map(self.conv2d, x)))
         x = self.conv3d(x)
         x, _ = self.rnn(x, None)
         x = self.stack(x[:, -1])
