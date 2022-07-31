@@ -8,15 +8,15 @@ class NeuralNetwork(nn.Module):
 
         self.rnn1 = nn.RNN(
             input_size = 1,
-            hidden_size = 64
+            hidden_size = out_size
         )
         self.rnn2 = nn.RNN(
             input_size = 1,
-            hidden_size = 64
+            hidden_size = out_size
         )
         self.rnn3 = nn.RNN(
             input_size = 1,
-            hidden_size = 64
+            hidden_size = out_size
         )
         self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
 
@@ -35,7 +35,7 @@ class NeuralNetwork(nn.Module):
         self.stack = nn.Sequential(
             nn.MaxPool2d((len(self.rnnlist), 1)),
             nn.Flatten(),
-            nn.Linear(64, len(ansmap)+1)
+            nn.Linear(out_size, len(ansmap)+1)
         )
     
     def forward(self, x):
