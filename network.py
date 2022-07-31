@@ -6,38 +6,41 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
 
+        self.rnn1 = nn.RNN(
+            input_size = 1,
+            hidden_size = 64
+        )
+        self.rnn2 = nn.RNN(
+            input_size = 1,
+            hidden_size = 64
+        )
+        self.rnn3 = nn.RNN(
+            input_size = 1,
+            hidden_size = 64
+        )
+        self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
+
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channel, second*diff, second*diff),
+            nn.BatchNorm2d(channel),
             nn.ReLU(),
-            nn.MaxPool2d(pool)
-        )
-
-        self.conv3d = nn.Sequential(
-            nn.Conv3d(arr_size, arr_size, third, third),
+            nn.MaxPool2d(pool),
+            nn.Conv2d(channel, len(self.rnnlist), third, third),
+            nn.BatchNorm2d(len(self.rnnlist)),
             nn.ReLU(),
-            nn.MaxPool3d(pool),
-            nn.Flatten(2)
+            nn.MaxPool2d(pool),
+            nn.Flatten(1)
         )
-
-        self.rnndict = {
-            key: nn.RNN(
-                input_size = 1,
-                hidden_size = 64
-            ) for key in ansmap.keys()
-        }
 
         self.stack = nn.Sequential(
-            nn.Linear(64, len(ansmap))
+            nn.MaxPool2d((len(self.rnnlist), 1)),
+            nn.Flatten(),
+            nn.Linear(64, len(ansmap)+1)
         )
     
-    def forward(self, x, teach):
+    def forward(self, x):
         x = torch.stack(list(map(self.conv2d, x)))
-        x = self.conv3d(x)
-        x = torch.stack(list(map(self.rnniter, x, teach)))
-        x = self.stack(x[:, -1])
-        return x
-    
-    def rnniter(self, e, t):
-        kind = list(ansmap.keys())[list(ansmap.values()).index(list(t))]
-        x, _ = self.rnndict[kind](e, None)
+        x = torch.stack([torch.stack(list(map(lambda e, rnn: rnn(e.reshape(arr_size, -1), None)[0], \
+            [xi[:, i] for i in range(len(self.rnnlist))], self.rnnlist))) for xi in x])
+        x = self.stack(x[:, :, -1])
         return x

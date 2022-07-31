@@ -15,7 +15,7 @@ class Study:
         print('train')
         for _ in tqdm(range(int(self.diff[0]))):
             train, teach = self.create_randrange()
-            pred = self.model(train, teach)
+            pred = self.model(train)
             loss = self.loss_fn(pred, teach)
 
             self.optimizer.zero_grad()
@@ -23,12 +23,12 @@ class Study:
             self.optimizer.step()
 
     def test(self):
-        test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)), np.array([])
+        test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
         print('test')
         with torch.no_grad():
             for _ in tqdm(range(int(self.diff[1]))):
                 train, teach = self.create_randrange()
-                pred = self.model(train, teach)
+                pred = self.model(train)
                 test_loss += self.loss_fn(pred, teach).item()
 
                 for p, t in zip(pred, teach):
