@@ -7,6 +7,7 @@ class NeuralNetwork(nn.Module):
         super().__init__()
 
         self.conv2d = nn.Sequential(
+            nn.Dropout2d(0.8),
             nn.Conv2d(3, channel, second*diff, second*diff),
             nn.ReLU(),
             nn.MaxPool2d(pool)
@@ -14,6 +15,7 @@ class NeuralNetwork(nn.Module):
 
         self.conv3d = nn.Sequential(
             nn.Conv3d(arr_size, arr_size, third, third),
+            nn.BatchNorm3d(arr_size),
             nn.ReLU(),
             nn.MaxPool3d(pool),
             nn.Flatten(2)
@@ -26,12 +28,8 @@ class NeuralNetwork(nn.Module):
         )
 
         self.stack = nn.Sequential(
-            nn.Linear(64, 16),
-            nn.ReLU(),
-            nn.Linear(16, 16),
-            nn.ReLU(),
-            nn.Linear(16, len(ansmap)+1),
-            nn.Softmax(1)
+            nn.Dropout(0.8),
+            nn.Linear(64, len(ansmap)+1)
         )
     
     def forward(self, x):

@@ -12,10 +12,9 @@ for t in range(epochs):
     print(f'Epoch {t+1}\n-------------------------------')
     study.train()
     study.test()
+    print('Saving PyTorch Model State')
+    torch.save(model.state_dict(), 'out/model_weights.pth')
     if study.correct > 0.9995:
         print('this prediction is perfect')
         break
 print('Done!')
-
-torch.save(model.state_dict(), 'out/model_weights.pth')
-print('Saved PyTorch Model State')
