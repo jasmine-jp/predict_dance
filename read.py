@@ -35,7 +35,7 @@ def read(name, terdir):
 def all_read(name):
     if input('update data [y/n]: ') == 'y':
         data, teachs, plot = np.array([]), np.array([]), np.array([])
-        other = [0 for _ in range(len(ansmap))]+[1]
+        other = [0 for _ in range(len(ansmap)-1)]+[1]
         for s in os.listdir(name):
             arr = read(s, name)
             data = arr if data.size == 0 else np.append(data, arr, axis=0)

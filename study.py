@@ -6,7 +6,7 @@ from common import arr_size, ansmap
 class Study:
     def __init__(self, model, read, batch, diff):
         self.loss_fn = torch.nn.HuberLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+        self.optimizer = torch.optim.Adam(model.parameters())
         self.model, self.batch = model, batch
         self.data, self.teach, self.plot = read
         self.diff = np.array([len(self.teach)-diff, diff])/self.batch
@@ -15,7 +15,7 @@ class Study:
         print('train')
         for _ in tqdm(range(int(self.diff[0]))):
             train, teach = self.create_randrange()
-            pred = self.model(train)
+            pred = self.model(train, teach)
             loss = self.loss_fn(pred, teach)
 
             self.optimizer.zero_grad()
@@ -23,12 +23,12 @@ class Study:
             self.optimizer.step()
 
     def test(self):
-        test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
+        test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)), np.array([])
         print('test')
         with torch.no_grad():
             for _ in tqdm(range(int(self.diff[1]))):
                 train, teach = self.create_randrange()
-                pred = self.model(train)
+                pred = self.model(train, teach)
                 test_loss += self.loss_fn(pred, teach).item()
 
                 for p, t in zip(pred, teach):

@@ -7,7 +7,6 @@ class NeuralNetwork(nn.Module):
         super().__init__()
 
         self.conv2d = nn.Sequential(
-            nn.Dropout2d(0.8),
             nn.Conv2d(3, channel, second*diff, second*diff),
             nn.ReLU(),
             nn.MaxPool2d(pool)
@@ -15,26 +14,30 @@ class NeuralNetwork(nn.Module):
 
         self.conv3d = nn.Sequential(
             nn.Conv3d(arr_size, arr_size, third, third),
-            nn.BatchNorm3d(arr_size),
             nn.ReLU(),
             nn.MaxPool3d(pool),
             nn.Flatten(2)
         )
 
-        self.rnn = nn.LSTM(
-            input_size = 1,
-            hidden_size = 64,
-            batch_first = True
-        )
+        self.rnndict = {
+            key: nn.RNN(
+                input_size = 1,
+                hidden_size = 64
+            ) for key in ansmap.keys()
+        }
 
         self.stack = nn.Sequential(
-            nn.Dropout(0.8),
-            nn.Linear(64, len(ansmap)+1)
+            nn.Linear(64, len(ansmap))
         )
     
-    def forward(self, x):
+    def forward(self, x, teach):
         x = torch.stack(list(map(self.conv2d, x)))
         x = self.conv3d(x)
-        x, _ = self.rnn(x, None)
+        x = torch.stack(list(map(self.rnniter, x, teach)))
         x = self.stack(x[:, -1])
+        return x
+    
+    def rnniter(self, e, t):
+        kind = list(ansmap.keys())[list(ansmap.values()).index(list(t))]
+        x, _ = self.rnndict[kind](e, None)
         return x
