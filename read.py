@@ -1,8 +1,5 @@
-import cv2
-import os
-import numpy as np
+import cv2, os, pickle, numpy as np
 from tqdm import tqdm
-import pickle
 from common import size, arr_size, ansmap
 
 def read(name, terdir):

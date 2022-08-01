@@ -1,8 +1,7 @@
-import torch
+import torch, torchinfo
 from network import NeuralNetwork
 from study import Study
 from read import test_read
-import torchinfo
 from common import arr_size, size
 # print('Input Size:', 10, arr_size, 3, size, size)
 # torchinfo.summary(NeuralNetwork(), (10, arr_size, 3, size, size))
