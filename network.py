@@ -33,14 +33,19 @@ class NeuralNetwork(nn.Module):
         )
 
         self.stack = nn.Sequential(
-            nn.MaxPool2d((len(self.rnnlist), 1)),
+            nn.ReLU(),
+            nn.AvgPool2d((len(self.rnnlist), 1)),
             nn.Flatten(),
             nn.Linear(out_size, len(ansmap)+1)
         )
     
     def forward(self, x):
         x = torch.stack(list(map(self.conv2d, x)))
-        x = torch.stack([torch.stack(list(map(lambda e, rnn: rnn(e.reshape(arr_size, -1), None)[0], \
-            [xi[:, i] for i in range(len(self.rnnlist))], self.rnnlist))) for xi in x])
+        x = torch.stack([
+            torch.stack(list(map(
+                lambda e, n: self.rnnlist[n](e.reshape(arr_size, -1), None)[0],
+                [xi[:, i] for i in range(len(self.rnnlist))], xi[-1].sub(xi[0]).argsort()
+            )))
+        for xi in x])
         x = self.stack(x[:, :, -1])
         return x
