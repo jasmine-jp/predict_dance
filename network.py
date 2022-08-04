@@ -22,11 +22,9 @@ class NeuralNetwork(nn.Module):
 
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channel, second*diff, second*diff),
-            nn.BatchNorm2d(channel),
             nn.ReLU(),
             nn.MaxPool2d(pool),
             nn.Conv2d(channel, len(self.rnnlist), third, third),
-            nn.BatchNorm2d(len(self.rnnlist)),
             nn.ReLU(),
             nn.MaxPool2d(pool),
             nn.Flatten(1)
@@ -41,11 +39,10 @@ class NeuralNetwork(nn.Module):
     
     def forward(self, x):
         x = torch.stack(list(map(self.conv2d, x)))
-        x = torch.stack([
-            torch.stack(list(map(
-                lambda e, n: self.rnnlist[n](e.reshape(arr_size, -1), None)[0],
-                [xi[:, i] for i in range(len(self.rnnlist))], xi[-1].sub(xi[0]).argsort()
-            )))
-        for xi in x])
+        self.conv = x.detach().clone()
+        x = torch.stack([torch.stack(list(map(
+            lambda e, n: self.rnnlist[n](e.reshape(arr_size, -1), None)[0],
+            xi.transpose(0, 1), (xi[-1]-xi[0]).argsort()
+        )))for xi in x])
         x = self.stack(x[:, :, -1])
         return x

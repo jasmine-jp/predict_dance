@@ -4,19 +4,21 @@ import numpy as np
 from common import arr_size, ansmap
 
 class Study:
-    def __init__(self, model, read, batch, diff):
+    def __init__(self, model, read, batch, diff, p):
         self.loss_fn = torch.nn.HuberLoss()
         self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
-        self.model, self.batch = model, batch
+        self.model, self.batch, self.p = model, batch, p
         self.data, self.teach, self.plot = read
         self.diff = np.array([len(self.teach)-diff, diff])/self.batch
 
     def train(self):
         print('train')
-        for _ in tqdm(range(int(self.diff[0]))):
+        for i in tqdm(range(int(self.diff[0]))):
             train, teach = self.create_randrange()
             pred = self.model(train)
             loss = self.loss_fn(pred, teach)
+            if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
+                self.p.saveimg(self.model, teach, i+1)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -26,10 +28,13 @@ class Study:
         test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
         print('test')
         with torch.no_grad():
-            for _ in tqdm(range(int(self.diff[1]))):
+            for i in tqdm(range(int(self.diff[1]))):
+                self.p.test = True
                 train, teach = self.create_randrange()
                 pred = self.model(train)
                 test_loss += self.loss_fn(pred, teach).item()
+                if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
+                    self.p.saveimg(self.model, teach, i+1)
 
                 for p, t in zip(pred, teach):
                     self.correct += (t[p.argmax()] == 1).type(torch.float).sum().item()

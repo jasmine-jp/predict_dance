@@ -2,14 +2,16 @@ import torch
 from study import Study
 from network import NeuralNetwork
 from read import all_read
+from plot import plot
 
 model = NeuralNetwork()
-read = all_read('video')
-study = Study(model, read, 10, 5000)
+p = plot(True)
+study = Study(model, all_read('video'), 10, 5000, p)
 
 epochs = 3
 for t in range(epochs):
     print(f'Epoch {t+1}\n-------------------------------')
+    p.epoch, p.test = t, False
     study.train()
     study.test()
     print('Saving PyTorch Model State')
