@@ -6,7 +6,7 @@ from common import arr_size, ansmap
 class Study:
     def __init__(self, model, read, batch, diff, p):
         self.loss_fn = torch.nn.HuberLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
         self.model, self.batch, self.p = model, batch, p
         self.data, self.teach, self.plot = read
         self.diff = np.array([len(self.teach)-diff, diff])/self.batch
