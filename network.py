@@ -8,15 +8,18 @@ class NeuralNetwork(nn.Module):
 
         self.rnn1 = nn.RNN(
             input_size = 1,
-            hidden_size = out_size
+            hidden_size = out_size,
+            batch_first = True
         )
         self.rnn2 = nn.RNN(
             input_size = 1,
-            hidden_size = out_size
+            hidden_size = out_size,
+            batch_first = True
         )
         self.rnn3 = nn.RNN(
             input_size = 1,
-            hidden_size = out_size
+            hidden_size = out_size,
+            batch_first = True
         )
         self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
 
@@ -35,7 +38,6 @@ class NeuralNetwork(nn.Module):
         )
 
         self.stack = nn.Sequential(
-            nn.ReLU(),
             nn.AvgPool2d((len(self.rnnlist), 1)),
             nn.Flatten(),
             nn.Linear(out_size, len(ansmap)+1)
@@ -45,10 +47,12 @@ class NeuralNetwork(nn.Module):
         x = torch.stack(list(map(self.conv2d, x)))
         x = self.norm(x)
         self.conv = x.detach().clone()
-        x = torch.stack([torch.stack(list(map(
-            lambda e, n: self.rnnlist[n](e.reshape(arr_size, -1), None)[0],
-            xi.transpose(0, 1), (xi[-1]-xi[0]).argsort()
-        )))for xi in x])
+        x = torch.stack(
+            [xi[(xi.max(1).values-xi.min(1).values).argsort()] for xi in x.transpose(1, 2)]
+        ).transpose(0, 1)
+        x = torch.stack(list(map(
+            lambda e: self.rnnlist[e[0]](e[1].reshape((10, arr_size, -1)), None)[0], enumerate(x)))
+        ).transpose(0, 1)
         self.rnn = x[:, :, -1].detach().clone()
         x = self.stack(x[:, :, -1])
         return x

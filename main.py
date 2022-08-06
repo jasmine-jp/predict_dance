@@ -11,7 +11,7 @@ study = Study(model, all_read('video'), 10, 5000, p)
 epochs = 3
 for t in range(epochs):
     print(f'Epoch {t+1}\n-------------------------------')
-    p.epoch, p.test = t+1, False
+    p.epoch = t+1
     study.train()
     study.test()
     print('Saving PyTorch Model State')

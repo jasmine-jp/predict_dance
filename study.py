@@ -13,6 +13,7 @@ class Study:
 
     def train(self):
         print('train')
+        self.p.test = False
         for i in tqdm(range(int(self.diff[0]))):
             train, teach = self.create_randrange()
             pred = self.model(train)
@@ -27,9 +28,9 @@ class Study:
     def test(self):
         test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
         print('test')
+        self.p.test = True
         with torch.no_grad():
             for i in tqdm(range(int(self.diff[1]))):
-                self.p.test = True
                 train, teach = self.create_randrange()
                 pred = self.model(train)
                 test_loss += self.loss_fn(pred, teach).item()

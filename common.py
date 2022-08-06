@@ -4,9 +4,9 @@ ansmap = {
     'elegant': [1, 0, 0],
     'dance': [0, 1, 0]
 }
-size, arr_size, pool = 60, 32, 2
+size, arr_size, pool = 60, 128, 2
 third, second = factorint(int(size/pool/pool)).keys()
 diff = int(size/second/third/pool/pool)
 channel = int(size/second/pool/diff)
 
-out_size = 32
+out_size = 128
