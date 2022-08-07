@@ -6,7 +6,7 @@ from common import arr_size, ansmap
 class Study:
     def __init__(self, model, read, batch, diff, p):
         self.loss_fn = torch.nn.HuberLoss()
-        self.optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
+        self.optimizer = torch.optim.Adam(model.parameters())
         self.model, self.batch, self.p = model, batch, p
         self.data, self.teach, self.plot = read
         self.diff = np.array([len(self.teach)-diff, diff])/self.batch
@@ -18,12 +18,13 @@ class Study:
             train, teach = self.create_randrange()
             pred = self.model(train)
             loss = self.loss_fn(pred, teach)
-            if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
-                self.p.saveimg(self.model, teach, i+1)
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            
+            if ((i+1) % 300 == 0 or i == 0) and self.p.execute:
+                self.p.saveimg(self.model, teach, i+1)
 
     def test(self):
         test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
@@ -34,13 +35,14 @@ class Study:
                 train, teach = self.create_randrange()
                 pred = self.model(train)
                 test_loss += self.loss_fn(pred, teach).item()
-                if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
-                    self.p.saveimg(self.model, teach, i+1)
 
                 for p, t in zip(pred, teach):
                     self.correct += (t[p.argmax()] == 1).type(torch.float).sum().item()
                     presum[p.argmax()] += 1
                     ans = t if ans.size == 0 else ans+t
+                
+                if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
+                    self.p.saveimg(self.model, teach, i+1)
 
         test_loss /= self.diff[1]
         self.correct /= self.diff[1]*self.batch

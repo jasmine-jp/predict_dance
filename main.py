@@ -5,13 +5,12 @@ from read import all_read
 from plot import plot
 
 model = NeuralNetwork()
-p = plot(True)
-study = Study(model, all_read('video'), 10, 5000, p)
+study = Study(model, all_read('video'), 10, 5000, plot(True))
 
-epochs = 3
+epochs = 5
 for t in range(epochs):
     print(f'Epoch {t+1}\n-------------------------------')
-    p.epoch = t+1
+    study.p.epoch = t+1
     study.train()
     study.test()
     print('Saving PyTorch Model State')

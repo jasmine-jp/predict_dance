@@ -6,47 +6,46 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.rnn1 = nn.RNN(
+        self.rnn1 = nn.LSTM(
             input_size = 1,
-            hidden_size = out_size,
+            hidden_size = int(arr_size/4),
             batch_first = True
         )
-        self.rnn2 = nn.RNN(
+        self.rnn2 = nn.GRU(
             input_size = 1,
-            hidden_size = out_size,
+            hidden_size = int(arr_size/2),
             batch_first = True
         )
         self.rnn3 = nn.RNN(
             input_size = 1,
-            hidden_size = out_size,
+            hidden_size = int(arr_size/16),
             batch_first = True
         )
         self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
 
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channel, second*diff, second*diff),
+            nn.BatchNorm2d(channel),
             nn.ReLU(),
             nn.MaxPool2d(pool),
             nn.Conv2d(channel, len(self.rnnlist), third, third),
+            nn.BatchNorm2d(len(self.rnnlist)),
             nn.ReLU(),
-            nn.MaxPool2d(pool)
+            nn.MaxPool2d(pool),
+            nn.Flatten(1)
         )
 
         self.stack = nn.Sequential(
+            nn.BatchNorm1d(len(self.rnnlist)),
             nn.AvgPool2d((len(self.rnnlist), 1)),
             nn.Flatten(),
             nn.Linear(arr_size, len(ansmap)+1)
         )
     
     def forward(self, x):
-        x = torch.stack(list(map(self.conv2d, x)))
-        self.conv = x.detach().clone()
-        x = torch.stack(list(map(lambda e:
-            self.rnnlist[e[0]](e[1].reshape((10, arr_size, -1)), None)[0],
-            enumerate(torch.stack(
-                [xi[(xi.max(1).values-xi.min(1).values).argsort()] for xi in x.transpose(1, 2)]
-            ).transpose(0, 1))
-        ))).transpose(0, 1)
-        self.rnn = x[:, :, :, -1].detach().clone()
-        x = self.stack(x[:, :, :, -1])
-        return x
+        self.c = torch.stack(list(map(self.conv2d, x))).transpose(1, 2)
+        self.r = torch.stack(list(map(lambda l, e:
+            l(e.reshape((10, arr_size, -1)))[0][:,:,-1], self.rnnlist, torch.stack(
+                [c[(c.max(1).values-c.min(1).values).argsort()] for c in self.c]
+        ).transpose(0, 1)))).transpose(0, 1)
+        return self.stack(self.r)
