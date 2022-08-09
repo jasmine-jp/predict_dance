@@ -8,7 +8,7 @@ class NeuralNetwork(nn.Module):
 
         self.rnn1 = nn.LSTM(
             input_size = 1,
-            hidden_size = int(arr_size/4),
+            hidden_size = int(arr_size/2),
             batch_first = True
         )
         self.rnn2 = nn.GRU(
@@ -18,10 +18,12 @@ class NeuralNetwork(nn.Module):
         )
         self.rnn3 = nn.RNN(
             input_size = 1,
-            hidden_size = int(arr_size/32),
+            hidden_size = int(arr_size/2),
             batch_first = True
         )
-        self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
+        self.rnnlist = [self.rnn3, self.rnn2, self.rnn1]
+        self.rnn1hn, self.rnn2hn, self.rnn3hn = None, None, None
+        self.hnlist = [self.rnn3hn, self.rnn2hn, self.rnn1hn]
 
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channel, second*diff, second*diff),
@@ -36,7 +38,6 @@ class NeuralNetwork(nn.Module):
         )
 
         self.stack = nn.Sequential(
-            nn.BatchNorm1d(len(self.rnnlist)),
             nn.AvgPool2d((len(self.rnnlist), 1)),
             nn.Flatten(),
             nn.Linear(arr_size, len(ansmap)+1)
@@ -44,8 +45,13 @@ class NeuralNetwork(nn.Module):
     
     def forward(self, x):
         self.c = torch.stack(list(map(self.conv2d, x))).transpose(1, 2)
-        self.r = torch.stack(list(map(lambda l, e:
-            l(e.reshape((10, arr_size, -1)))[0][:,:,-1], self.rnnlist, torch.stack(
-                [c[(c.max(1).values-c.min(1).values).argsort()] for c in self.c]
-        ).transpose(0, 1)))).transpose(0, 1)
+        self.r = torch.stack(list(map(self.arrange, self.rnnlist, enumerate(
+            torch.stack([c[(c.max(1).values-c.min(1).values).argsort()] for c in self.c])
+        .transpose(0, 1))))).transpose(0, 1)
         return self.stack(self.r)
+    
+    def arrange(self, l, e):
+        o, hn = l(e[1].reshape((10, arr_size, -1)), self.hnlist[e[0]])
+        hc = hn.detach().clone() if len(hn) == 1 else tuple(map(lambda hc: hc.detach().clone(), hn))
+        self.hnlist[e[0]] = hc
+        return o[:, :, -1]
