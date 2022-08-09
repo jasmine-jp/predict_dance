@@ -18,7 +18,7 @@ class plot:
         ax1.set_title('conv')
         ax2.set_title('rnn')
         for i, (c, r) in enumerate(zip(conv, rnn)):
-            labelname = f'{name[value[i]]}:{["min","mid","max"][i]}'
+            labelname = f'{name[i]}:{["min","mid","max"][i]}'
             ax1.plot(list(map(float, c)), c=color[i])
             ax2.plot(list(map(float, r)), c=color[value[i]], label=labelname)
         ax2.legend(bbox_to_anchor=(1, 1), frameon=False)

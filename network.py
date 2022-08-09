@@ -6,19 +6,19 @@ class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.rnn1 = nn.GRU(
+        self.rnn1 = nn.LSTM(
             input_size = 1,
-            hidden_size = int(arr_size/1.2),
+            hidden_size = int(arr_size/4),
             batch_first = True
         )
         self.rnn2 = nn.GRU(
             input_size = 1,
-            hidden_size = int(arr_size/1.5),
+            hidden_size = int(arr_size/2),
             batch_first = True
         )
-        self.rnn3 = nn.LSTM(
+        self.rnn3 = nn.RNN(
             input_size = 1,
-            hidden_size = int(arr_size/1.2),
+            hidden_size = int(arr_size/32),
             batch_first = True
         )
         self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
@@ -36,6 +36,7 @@ class NeuralNetwork(nn.Module):
         )
 
         self.stack = nn.Sequential(
+            nn.BatchNorm1d(len(self.rnnlist)),
             nn.AvgPool2d((len(self.rnnlist), 1)),
             nn.Flatten(),
             nn.Linear(arr_size, len(ansmap)+1)
