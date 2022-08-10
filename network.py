@@ -8,22 +8,22 @@ class NeuralNetwork(nn.Module):
 
         self.rnn1 = nn.LSTM(
             input_size = 1,
-            hidden_size = int(arr_size/2),
+            hidden_size = hidden,
             batch_first = True
         )
-        self.rnn2 = nn.GRU(
+        self.rnn2 = nn.LSTM(
             input_size = 1,
-            hidden_size = int(arr_size/2),
+            hidden_size = hidden,
             batch_first = True
         )
-        self.rnn3 = nn.RNN(
+        self.rnn3 = nn.LSTM(
             input_size = 1,
-            hidden_size = int(arr_size/2),
+            hidden_size = hidden,
             batch_first = True
         )
-        self.rnnlist = [self.rnn3, self.rnn2, self.rnn1]
+        self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
         self.rnn1hn, self.rnn2hn, self.rnn3hn = None, None, None
-        self.hnlist = [self.rnn3hn, self.rnn2hn, self.rnn1hn]
+        self.hnlist = [self.rnn1hn, self.rnn2hn, self.rnn3hn]
 
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channel, second*diff, second*diff),
@@ -51,7 +51,7 @@ class NeuralNetwork(nn.Module):
         return self.stack(self.r)
     
     def arrange(self, l, e):
-        o, hn = l(e[1].reshape((10, arr_size, -1)), self.hnlist[e[0]])
-        hc = hn.detach().clone() if len(hn) == 1 else tuple(map(lambda hc: hc.detach().clone(), hn))
+        o, hn = l(e[1].reshape((batch, arr_size, -1)), self.hnlist[e[0]])
+        hc = (hn[0].detach().clone(), hn[1].detach().clone())
         self.hnlist[e[0]] = hc
         return o[:, :, -1]

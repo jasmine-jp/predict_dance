@@ -5,7 +5,7 @@ from read import all_read
 from plot import plot
 
 model = NeuralNetwork()
-study = Study(model, all_read('video'), 10, 5000, plot(True))
+study = Study(model, all_read('video'), 5000, plot(True))
 
 epochs = 5
 for t in range(epochs):

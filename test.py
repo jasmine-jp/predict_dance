@@ -8,7 +8,7 @@ from plot import plot
 # torchinfo.summary(NeuralNetwork(), (10, arr_size, 3, size, size))
 
 model = NeuralNetwork()
-study = Study(model, test_read(), 10, 750, plot(False))
+study = Study(model, test_read(), 750, plot(False))
 
 model.load_state_dict(torch.load('out/model_weights.pth'))
 

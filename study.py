@@ -1,15 +1,15 @@
 import torch
 from tqdm import tqdm
 import numpy as np
-from common import arr_size, ansmap
+from common import arr_size, ansmap, batch
 
 class Study:
-    def __init__(self, model, read, batch, diff, p):
+    def __init__(self, model, read, diff, p):
         self.loss_fn = torch.nn.HuberLoss()
         self.optimizer = torch.optim.Adam(model.parameters())
-        self.model, self.batch, self.p = model, batch, p
+        self.model, self.p = model, p
         self.data, self.teach, self.plot = read
-        self.diff = np.array([len(self.teach)-diff, diff])/self.batch
+        self.diff = np.array([len(self.teach)-diff, diff])/batch
 
     def train(self):
         print('train')
@@ -45,12 +45,12 @@ class Study:
                     self.p.saveimg(self.model, teach, i+1)
 
         test_loss /= self.diff[1]
-        self.correct /= self.diff[1]*self.batch
+        self.correct /= self.diff[1]*batch
         print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {test_loss:>8f}')
         print(f'Sum: {list(map(int, presum))}, Ans: {list(map(int, ans))}')
     
     def create_randrange(self):
-        r = np.random.randint(0, len(self.data), self.batch)
+        r = np.random.randint(0, len(self.data), batch)
         idx = np.array(list(map(lambda e: np.argmin(np.abs(self.plot-e)), r)))
         trainE = np.array(list(map(lambda e, i: e-arr_size if 0<e-self.plot[i]<arr_size else e, r, idx)))
         trainNum = np.array(list(map(lambda e: np.arange(e, e+arr_size), trainE)))
