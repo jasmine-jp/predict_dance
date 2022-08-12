@@ -20,7 +20,7 @@ class plot:
         for i, (c, r) in enumerate(zip(conv, rnn)):
             labelname = f'{name[i]}:{["min","mid","max"][i]}'
             ax1.plot(list(map(float, c)), c=color[i])
-            ax2.plot(list(map(float, r)), c=color[value[i]], label=labelname)
+            ax2.plot(list(map(float, r.mean(dim=1))), c=color[value[i]], label=labelname)
         ax2.legend(bbox_to_anchor=(1, 1), frameon=False)
         s = 'test' if self.test else 'epoch_'+str(self.epoch)
         fig.savefig(f'img/{s}/estimate_{idx}')

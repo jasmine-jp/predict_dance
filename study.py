@@ -1,12 +1,11 @@
-import torch
+import torch, numpy as np
 from tqdm import tqdm
-import numpy as np
 from common import arr_size, ansmap, batch
 
 class Study:
     def __init__(self, model, read, diff, p):
         self.loss_fn = torch.nn.HuberLoss()
-        self.optimizer = torch.optim.Adam(model.parameters())
+        self.optimizer = torch.optim.RAdam(model.parameters())
         self.model, self.p = model, p
         self.data, self.teach, self.plot = read
         self.diff = np.array([len(self.teach)-diff, diff])/batch

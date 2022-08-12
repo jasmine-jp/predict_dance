@@ -7,7 +7,7 @@ from plot import plot
 model = NeuralNetwork()
 study = Study(model, all_read('video'), 5000, plot(True))
 
-epochs = 5
+epochs = 20
 for t in range(epochs):
     print(f'Epoch {t+1}\n-------------------------------')
     study.p.epoch = t+1

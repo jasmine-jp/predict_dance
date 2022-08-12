@@ -38,7 +38,7 @@ class NeuralNetwork(nn.Module):
         )
 
         self.stack = nn.Sequential(
-            nn.AvgPool2d((len(self.rnnlist), 1)),
+            nn.AvgPool3d((len(self.rnnlist), 1, rang)),
             nn.Flatten(),
             nn.Linear(arr_size, len(ansmap)+1)
         )
@@ -54,4 +54,4 @@ class NeuralNetwork(nn.Module):
         o, hn = l(e[1].reshape((batch, arr_size, -1)), self.hnlist[e[0]])
         hc = (hn[0].detach().clone(), hn[1].detach().clone())
         self.hnlist[e[0]] = hc
-        return o[:, :, -1]
+        return o[:, :, hidden-rang:hidden]
