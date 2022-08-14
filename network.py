@@ -40,12 +40,8 @@ class NeuralNetwork(nn.Module):
             hidden_size = hidden
         )
         self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
-        self.rnn1hn, self.rnn2hn, self.rnn3hn = None, None, None
-        self.hnlist = [self.rnn1hn, self.rnn2hn, self.rnn3hn]
 
         self.stack = nn.Sequential(
-            nn.AvgPool2d((1, 3)),
-            nn.Flatten(),
             nn.Linear(arr_size, len(ansmap)+1)
         )
     
@@ -56,6 +52,5 @@ class NeuralNetwork(nn.Module):
         return self.stack(self.r)
     
     def arrange(self, p, e):
-        o, hn = self.rnnlist[p](e.reshape((arr_size, -1)), self.hnlist[p])
-        self.hnlist[p] = (hn[0].detach().clone(), hn[1].detach().clone())
+        o, _ = self.rnnlist[p](e.reshape((arr_size, -1)))
         return o[:, -1]
