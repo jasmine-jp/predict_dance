@@ -5,7 +5,7 @@ class plot:
         self.epoch = 0
         self.test = False
         self.execute = execute
-    
+
     def saveimg(self, model, ans, idx):
         conv, rnn = model.c[0].detach().clone(), model.r[0].detach().clone()
         fig = plt.figure(figsize=(12.8, 4.8))

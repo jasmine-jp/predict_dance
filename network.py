@@ -44,13 +44,13 @@ class NeuralNetwork(nn.Module):
         self.stack = nn.Sequential(
             nn.Linear(arr_size, len(ansmap)+1)
         )
-    
+
     def forward(self, x):
         self.c = torch.stack(list(map(self.conv2d, x)))
         pre = self.prestack(self.c).argmax(dim=1)
         self.r = torch.stack(list(map(self.arrange, pre, self.c)))
         return self.stack(self.r)
-    
+
     def arrange(self, p, e):
         o, _ = self.rnnlist[p](e.reshape((arr_size, -1)))
         return o[:, -1]

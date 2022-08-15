@@ -26,14 +26,14 @@ class Study:
                 self.p.saveimg(self.model, teach, i+1)
 
     def test(self):
-        test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
+        self.test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
         print('test')
         self.p.test = True
         with torch.no_grad():
             for i in tqdm(range(int(self.diff[1]))):
                 train, teach = self.create_randrange()
                 pred = self.model(train)
-                test_loss += self.loss_fn(pred, teach).item()
+                self.test_loss += self.loss_fn(pred, teach).item()
 
                 for p, t in zip(pred, teach):
                     self.correct += (t[p.argmax()] == 1).type(torch.float).sum().item()
@@ -43,9 +43,9 @@ class Study:
                 if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
                     self.p.saveimg(self.model, teach, i+1)
 
-        test_loss /= self.diff[1]
+        self.test_loss /= self.diff[1]
         self.correct /= self.diff[1]*batch
-        print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {test_loss:>8f}')
+        print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {self.test_loss:>8f}')
         print(f'Sum: {list(map(int, presum))}, Ans: {list(map(int, ans))}')
     
     def create_randrange(self):

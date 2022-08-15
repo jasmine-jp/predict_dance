@@ -8,4 +8,4 @@ size, arr_size, pool = 60, 90, 2
 third, second = factorint(int(size/pool/pool)).keys()
 diff = int(size/second/third/pool/pool)
 channel = int(size/second/pool/diff)
-batch, hidden = 10, int(arr_size/2)
+batch, hidden = 10, arr_size
