@@ -27,9 +27,15 @@ class NeuralNetwork(nn.Module):
             nn.Softmax(1)
         )
 
-        self.rnnlist = nn.ModuleList([nn.LSTM(1, hidden) for _ in range(ans)])
-        self.hn = nn.ParameterList([nn.Parameter(torch.zeros((1, hidden))) for _ in range(ans)])
-        self.cn = nn.ParameterList([nn.Parameter(torch.zeros((1, hidden))) for _ in range(ans)])
+        self.rnn = nn.ModuleList(
+            [nn.LSTM(1, hidden) for _ in range(ans)]
+        )
+        self.hn = nn.ParameterList(
+            [nn.Parameter(torch.zeros((1, hidden))) for _ in range(ans)]
+        )
+        self.cn = nn.ParameterList(
+            [nn.Parameter(torch.zeros((1, hidden))) for _ in range(ans)]
+        )
 
         self.stack = nn.Sequential(
             nn.Linear(arr_size, ans)
@@ -42,6 +48,6 @@ class NeuralNetwork(nn.Module):
         return self.stack(self.r)
 
     def arrange(self, p, e):
-        o, hc = self.rnnlist[p](e.reshape((arr_size, -1)), (self.hn[p], self.cn[p]))
+        o, hc = self.rnn[p](e.reshape((arr_size, -1)), (self.hn[p], self.cn[p]))
         self.hn[p], self.cn[p] = map(lambda e: e.detach().clone(), hc)
         return o[:, -1]
