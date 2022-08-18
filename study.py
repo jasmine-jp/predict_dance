@@ -1,6 +1,6 @@
 import torch, numpy as np
 from tqdm import tqdm
-from common import arr_size, ansmap, batch
+from common import arr_size, batch, ans
 
 class Study:
     def __init__(self, model, read, diff, p):
@@ -26,7 +26,7 @@ class Study:
                 self.p.saveimg(self.model, teach, i+1)
 
     def test(self):
-        self.test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
+        self.test_loss, self.correct, presum, res = 0, 0, np.zeros(ans), np.array([])
         print('test')
         self.p.test = True
         with torch.no_grad():
@@ -38,7 +38,7 @@ class Study:
                 for p, t in zip(pred, teach):
                     self.correct += (t[p.argmax()] == 1).type(torch.float).sum().item()
                     presum[p.argmax()] += 1
-                    ans = t if ans.size == 0 else ans+t
+                    res = t if res.size == 0 else res+t
                 
                 if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
                     self.p.saveimg(self.model, teach, i+1)
@@ -46,7 +46,7 @@ class Study:
         self.test_loss /= self.diff[1]
         self.correct /= self.diff[1]*batch
         print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {self.test_loss:>8f}')
-        print(f'Sum: {list(map(int, presum))}, Ans: {list(map(int, ans))}')
+        print(f'Sum: {list(map(int, presum))}, Ans: {list(map(int, res))}')
     
     def create_randrange(self):
         r = np.random.randint(0, len(self.data), batch)

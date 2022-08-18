@@ -23,26 +23,16 @@ class NeuralNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(32, 32),
             nn.ReLU(),
-            nn.Linear(32, len(ansmap)+1),
+            nn.Linear(32, ans),
             nn.Softmax(1)
         )
 
-        self.rnn1 = nn.LSTM(
-            input_size = 1,
-            hidden_size = hidden
-        )
-        self.rnn2 = nn.LSTM(
-            input_size = 1,
-            hidden_size = hidden
-        )
-        self.rnn3 = nn.LSTM(
-            input_size = 1,
-            hidden_size = hidden
-        )
-        self.rnnlist = [self.rnn1, self.rnn2, self.rnn3]
+        self.rnnlist = nn.ModuleList([nn.LSTM(1, hidden) for _ in range(ans)])
+        self.hn = nn.ParameterList([nn.Parameter(torch.zeros((1, hidden))) for _ in range(ans)])
+        self.cn = nn.ParameterList([nn.Parameter(torch.zeros((1, hidden))) for _ in range(ans)])
 
         self.stack = nn.Sequential(
-            nn.Linear(arr_size, len(ansmap)+1)
+            nn.Linear(arr_size, ans)
         )
 
     def forward(self, x):
@@ -52,5 +42,6 @@ class NeuralNetwork(nn.Module):
         return self.stack(self.r)
 
     def arrange(self, p, e):
-        o, _ = self.rnnlist[p](e.reshape((arr_size, -1)))
+        o, hc = self.rnnlist[p](e.reshape((arr_size, -1)), (self.hn[p], self.cn[p]))
+        self.hn[p], self.cn[p] = map(lambda e: e.detach().clone(), hc)
         return o[:, -1]
