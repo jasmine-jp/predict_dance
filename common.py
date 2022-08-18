@@ -5,7 +5,7 @@ ansmap = {
     'dance': [0, 1, 0]
 }
 size, arr_size, pool = 60, 90, 2
-third, second = factorint(int(size/pool/pool)).keys()
+second, third = list(factorint(int(size/pool/pool)).keys())[-1:-3:-1]
 diff = int(size/second/third/pool/pool)
-channel = int(size/second/pool/diff)
+channel = int(size/second/pool)
 batch, hidden = 10, arr_size

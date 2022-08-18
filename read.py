@@ -14,7 +14,7 @@ def read(name, terdir):
     w, h = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     h_ma = int((h-w)/2) if w < h else 0
     w_ma = int((w-h)/2) if w > h else 0
-    
+
     if not os.path.isfile(pkl):
         print('dumping '+video)
         with open(pkl, 'wb') as f:

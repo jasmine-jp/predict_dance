@@ -7,11 +7,11 @@ class NeuralNetwork(nn.Module):
         super().__init__()
 
         self.conv2d = nn.Sequential(
-            nn.Conv2d(3, channel, second*diff, second*diff),
+            nn.Conv2d(3, channel, second, second),
             nn.BatchNorm2d(channel),
             nn.ReLU(),
             nn.MaxPool2d(pool),
-            nn.Conv2d(channel, 1, third, third),
+            nn.Conv2d(channel, 1, third*diff, third*diff),
             nn.BatchNorm2d(1),
             nn.ReLU(),
             nn.MaxPool2d(pool),
