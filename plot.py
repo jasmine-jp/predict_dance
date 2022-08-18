@@ -15,6 +15,6 @@ class plot:
         ax1.set_title('conv')
         ax2.set_title('rnn')
         ax1.plot(list(map(float, conv)))
-        ax2.plot(list(map(float, rnn)))
+        ax2.plot(list(map(float, rnn.mean(dim=0))))
         s = 'test' if self.test else 'epoch_'+str(self.epoch)
         fig.savefig(f'img/{s}/estimate_{idx}')
