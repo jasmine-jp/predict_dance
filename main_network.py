@@ -23,7 +23,7 @@ class MainNetwork(nn.Module):
         return self.stack(self.r)
 
     def arrange(self, r, p, i):
-        o, hc = r(self.c.reshape((batch,arr_size,-1)), (self.hn[i],zeros))
+        o, hc = r(self.c.reshape((batch,arr_size,-1)), (self.hn[i]*p,zeros))
         self.hn[i] = hc[0].detach().clone()
         return o[:, :, -1]*p
     

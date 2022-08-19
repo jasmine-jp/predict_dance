@@ -4,7 +4,7 @@ from common import arr_size, ansmap, batch
 
 class Study:
     def __init__(self, pre_model, main_model, read, diff, p):
-        self.pre_loss = torch.nn.BCELoss()
+        self.pre_loss = torch.nn.BCEWithLogitsLoss()
         self.pre_optimizer = torch.optim.RAdam(pre_model.parameters())
         self.main_loss = torch.nn.HuberLoss()
         self.main_optimizer = torch.optim.RAdam(main_model.parameters())
@@ -37,7 +37,8 @@ class Study:
                 self.p.saveimg(self.pre_model.c, self.main_model.r, teach, i+1)
 
     def test(self):
-        self.test_loss, self.correct, psum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
+        self.test_loss, self.correct, ans = 0, 0, torch.zeros(len(ansmap)+1)
+        msum, psum = np.zeros(len(ansmap)+1), np.zeros(len(ansmap)+1)
         print('test')
         self.p.test = True
         with torch.no_grad():
@@ -50,10 +51,11 @@ class Study:
 
                 self.test_loss += self.main_loss(main_pred, teach).item()
 
-                for p, t in zip(main_pred, teach):
-                    self.correct += (t[p.argmax()] == 1).type(torch.float).sum().item()
+                for m, p, t in zip(main_pred, pre_pred, teach):
+                    self.correct += (t[m.argmax()] == 1).type(torch.float).sum().item()
+                    msum[m.argmax()] += 1
                     psum[p.argmax()] += 1
-                    ans = t if ans.size == 0 else ans+t
+                    ans += t
                 
                 if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
                     self.p.saveimg(self.pre_model.c, self.main_model.r, teach, i+1)
@@ -61,7 +63,7 @@ class Study:
         self.test_loss /= self.diff[1]
         self.correct /= self.diff[1]*batch
         print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {self.test_loss:>8f}')
-        print(f'Sum: {list(map(int, psum))}, Ans: {list(map(int, ans))}')
+        print(f'Main: {list(map(int, msum))}, Pre: {list(map(int, psum))}, Ans: {list(map(int, ans))}')
     
     def create_randrange(self):
         r = np.random.randint(0, len(self.data), batch)
