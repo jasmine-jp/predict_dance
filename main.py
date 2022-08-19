@@ -1,11 +1,12 @@
 import torch
 from study import Study
-from network import NeuralNetwork
+from pre_network import PreNetwork
+from main_network import MainNetwork
 from read import all_read
 from plot import plot
 
-model = NeuralNetwork()
-study = Study(model, all_read('video'), 5000, plot(True))
+pre_model, main_model = PreNetwork(), MainNetwork()
+study = Study(pre_model, main_model, all_read('video'), 5000, plot(True))
 loss = 1
 
 epochs = 20
@@ -16,6 +17,7 @@ for t in range(epochs):
     study.test()
     if loss > study.test_loss:
         print('Saving PyTorch Model State')
-        torch.save(model.state_dict(), 'out/model_weights.pth')
+        torch.save(pre_model.state_dict(), 'out/pre_model.pth')
+        torch.save(main_model.state_dict(), 'out/main_model.pth')
         loss = study.test_loss
 print(f'final loss: {loss}')
