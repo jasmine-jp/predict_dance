@@ -17,4 +17,5 @@ class plot:
         ax1.plot(list(map(float, conv)))
         ax2.plot(list(map(float, rnn)))
         s = 'test' if self.test else 'epoch_'+str(self.epoch)
+        plt.close(fig)
         fig.savefig(f'img/{s}/estimate_{idx}')

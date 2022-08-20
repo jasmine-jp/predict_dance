@@ -1,6 +1,6 @@
 import cv2, os, pickle, numpy as np
 from tqdm import tqdm
-from common import size, arr_size, ansmap
+from common import size, arr_size, ansmap, lenA
 
 def read(name, terdir):
     name = name.split('.')[0]
@@ -14,7 +14,7 @@ def read(name, terdir):
     w, h = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     h_ma = int((h-w)/2) if w < h else 0
     w_ma = int((w-h)/2) if w > h else 0
-    
+
     if not os.path.isfile(pkl):
         print('dumping '+video)
         with open(pkl, 'wb') as f:
@@ -32,7 +32,7 @@ def read(name, terdir):
 def all_read(name):
     if input('update data [y/n]: ') == 'y':
         data, teachs, plot = np.array([]), np.array([]), np.array([])
-        other = [0 for _ in range(len(ansmap))]+[1]
+        other = [0 for _ in range(lenA-1)]+[1]
         for s in os.listdir(name):
             arr = read(s, name)
             data = arr if data.size == 0 else np.append(data, arr, axis=0)

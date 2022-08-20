@@ -1,6 +1,6 @@
 import torch, numpy as np
 from tqdm import tqdm
-from common import arr_size, ansmap, batch
+from common import arr_size, lenA, batch
 
 class Study:
     def __init__(self, model, read, diff, p):
@@ -11,43 +11,47 @@ class Study:
         self.diff = np.array([len(self.teach)-diff, diff])/batch
 
     def train(self):
+        self.p.test, stk = False, torch.zeros(lenA)
         print('train')
-        self.p.test = False
+
         for i in tqdm(range(int(self.diff[0]))):
             train, teach = self.create_randrange()
             pred = self.model(train)
             loss = self.loss_fn(pred, teach)
 
+            for p in self.model.pre:
+                stk[p] += 1
+
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            
+
             if ((i+1) % 300 == 0 or i == 0) and self.p.execute:
                 self.p.saveimg(self.model, teach, i+1)
 
+        print(f'Pre: {list(map(int, stk))}')
+
     def test(self):
-        self.test_loss, self.correct, presum, ans = 0, 0, np.zeros(len(ansmap)+1), np.array([])
+        self.test_loss, self.p.test, co, d = 0, True, 0, int(self.diff[1])
+        psum, ans = [torch.zeros(lenA) for _ in range(2)]
         print('test')
-        self.p.test = True
+
         with torch.no_grad():
-            for i in tqdm(range(int(self.diff[1]))):
+            for i in tqdm(range(d)):
                 train, teach = self.create_randrange()
                 pred = self.model(train)
                 self.test_loss += self.loss_fn(pred, teach).item()
 
-                for p, t in zip(pred, teach):
-                    self.correct += (t[p.argmax()] == 1).type(torch.float).sum().item()
-                    presum[p.argmax()] += 1
-                    ans = t if ans.size == 0 else ans+t
-                
+                for m, t in zip(pred.argmax(dim=1), teach):
+                    co, psum[m], ans = co+t[m], psum[m]+1, ans+t
+
                 if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
                     self.p.saveimg(self.model, teach, i+1)
 
-        self.test_loss /= self.diff[1]
-        self.correct /= self.diff[1]*batch
-        print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {self.test_loss:>8f}')
-        print(f'Sum: {list(map(int, presum))}, Ans: {list(map(int, ans))}')
-    
+            self.test_loss, co = self.test_loss/d, co/d/batch
+            print(f'Accuracy: {(100*co):>0.1f}%, Avg loss: {self.test_loss:>8f}')
+            print(f'Sum: {list(map(int, psum))}, Ans: {list(map(int, ans))}')
+
     def create_randrange(self):
         r = np.random.randint(0, len(self.data), batch)
         idx = np.array(list(map(lambda e: np.argmin(np.abs(self.plot-e)), r)))
