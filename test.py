@@ -6,7 +6,7 @@ from read import test_read
 from common import arr_size, size
 from plot import plot
 # print('Input Size:', 10, arr_size, 3, size, size)
-# torchinfo.summary(NeuralNetwork(), (10, arr_size, 3, size, size))
+# torchinfo.summary(PreNetwork(), (10, arr_size, 3, size, size))
 
 pre_model, main_model = PreNetwork(), MainNetwork()
 study = Study(pre_model, main_model, test_read(), 750, plot(False))

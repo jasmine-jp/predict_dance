@@ -6,7 +6,7 @@ class Study:
     def __init__(self, pre_model, main_model, read, diff, p):
         self.pre_loss = torch.nn.BCEWithLogitsLoss()
         self.pre_optimizer = torch.optim.RAdam(pre_model.parameters())
-        self.main_loss = torch.nn.HuberLoss()
+        self.main_loss = torch.nn.SmoothL1Loss()
         self.main_optimizer = torch.optim.RAdam(main_model.parameters())
         self.pre_model, self.main_model, self.p = pre_model, main_model, p
         self.data, self.teach, self.plot = read
@@ -64,7 +64,7 @@ class Study:
         self.correct /= self.diff[1]*batch
         print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {self.test_loss:>8f}')
         print(f'Main: {list(map(int, msum))}, Pre: {list(map(int, psum))}, Ans: {list(map(int, ans))}')
-    
+
     def create_randrange(self):
         r = np.random.randint(0, len(self.data), batch)
         idx = np.array(list(map(lambda e: np.argmin(np.abs(self.plot-e)), r)))
