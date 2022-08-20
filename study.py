@@ -13,8 +13,9 @@ class Study:
         self.diff = np.array([len(self.teach)-diff, diff])/batch
 
     def train(self):
-        print('train')
         self.p.test = False
+        print('train')
+
         for i in tqdm(range(int(self.diff[0]))):
             train, teach = self.create_randrange()
 
@@ -37,12 +38,12 @@ class Study:
                 self.p.saveimg(self.pre_model.c, self.main_model.r, teach, i+1)
 
     def test(self):
-        self.test_loss, self.correct, ans = 0, 0, torch.zeros(len(ansmap)+1)
-        msum, psum = np.zeros(len(ansmap)+1), np.zeros(len(ansmap)+1)
+        self.test_loss, self.p.test, co, d = 0, True, 0, int(self.diff[1])
+        msum, prsum, ans = [torch.zeros(len(ansmap)+1) for _ in range(3)]
         print('test')
-        self.p.test = True
+
         with torch.no_grad():
-            for i in tqdm(range(int(self.diff[1]))):
+            for i in tqdm(range(d)):
                 train, teach = self.create_randrange()
 
                 pre_pred = self.pre_model(train)
@@ -51,19 +52,16 @@ class Study:
 
                 self.test_loss += self.main_loss(main_pred, teach).item()
 
-                for m, p, t in zip(main_pred, pre_pred, teach):
-                    self.correct += (t[m.argmax()] == 1).type(torch.float).sum().item()
-                    msum[m.argmax()] += 1
-                    psum[p.argmax()] += 1
-                    ans += t
-                
+                for m, p, t in zip(main_pred.argmax(dim=1), pre_pred.argmax(dim=1), teach):
+                    co, msum[m], prsum[p], ans = co+t[m], msum[m]+1, prsum[p]+1, ans+t
+
                 if ((i+1) % 100 == 0 or i == 0) and self.p.execute:
                     self.p.saveimg(self.pre_model.c, self.main_model.r, teach, i+1)
 
-        self.test_loss /= self.diff[1]
-        self.correct /= self.diff[1]*batch
-        print(f'Test Result: \n Accuracy: {(100*self.correct):>0.1f}%, Avg loss: {self.test_loss:>8f}')
-        print(f'Main: {list(map(int, msum))}, Pre: {list(map(int, psum))}, Ans: {list(map(int, ans))}')
+            self.test_loss, co = self.test_loss/d, co/d/batch
+            print(f'Accuracy: {(100*co):>0.1f}%, Avg loss: {self.test_loss:>8f}')
+            print(f'Main: {list(map(int,msum))}, Pre: {list(map(int,prsum))}, Ans: {list(map(int,ans))}')
+
 
     def create_randrange(self):
         r = np.random.randint(0, len(self.data), batch)
