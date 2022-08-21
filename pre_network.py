@@ -15,10 +15,11 @@ class PreNetwork(nn.Module):
             nn.BatchNorm2d(1),
             nn.ReLU(),
             nn.MaxPool2d(pool),
-            nn.Flatten(0)
+            nn.Flatten()
         )
 
         self.prestack = nn.Sequential(
+            nn.Flatten(),
             nn.Linear(arr_size, 32),
             nn.ReLU(),
             nn.Linear(32, 32),

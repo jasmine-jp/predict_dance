@@ -62,7 +62,6 @@ class Study:
             print(f'Accuracy: {(100*co):>0.1f}%, Avg loss: {self.test_loss:>8f}')
             print(f'Main: {list(map(int,msum))}, Pre: {list(map(int,prsum))}, Ans: {list(map(int,ans))}')
 
-
     def create_randrange(self):
         r = np.random.randint(0, len(self.data), batch)
         idx = np.array(list(map(lambda e: np.argmin(np.abs(self.plot-e)), r)))

@@ -27,4 +27,4 @@ class MainNetwork(nn.Module):
         return o[:, :, -1]
 
     def setstate(self, c):
-        self.c = c.reshape((batch,arr_size,-1)).detach().clone()
+        self.c = c.detach().clone()
