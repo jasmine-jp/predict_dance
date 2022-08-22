@@ -17,20 +17,21 @@ class NeuralNetwork(nn.Module):
             nn.BatchNorm2d(1),
             nn.ReLU(),
             nn.MaxPool2d(pool),
-            nn.Flatten(0)
+            nn.Flatten()
         )
 
         self.prestack = nn.Sequential(
+            nn.Flatten(),
             nn.Linear(arr_size, 32),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Linear(32, 32),
-            nn.ReLU(),
+            nn.Tanh(),
             nn.Linear(32, lenA),
             nn.Softmax(1)
         )
 
         self.rnn = nn.ModuleList([nn.LSTM(1, hidden) for _ in ians])
-        #self.hn = nn.ParameterList([nn.Parameter(zeros) for _ in ians])
+        self.hn = nn.ParameterList([nn.Parameter(zeros) for _ in ians])
 
         self.stack = nn.Sequential(
             nn.Linear(arr_size, lenA)
@@ -43,5 +44,6 @@ class NeuralNetwork(nn.Module):
         return self.stack(self.r)
 
     def arrange(self, p, e):
-        o, _ = self.rnn[p](e.reshape((arr_size, -1)))
+        o, (hn, _) = self.rnn[p](e, (self.hn[p], zeros))
+        self.hn[p] = nn.Parameter(hn)
         return o[:, -1]
