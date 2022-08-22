@@ -20,15 +20,14 @@ class Study:
             train, teach = self.create_randrange()
 
             pre_pred = self.pre_model(train)
-            self.main_model.setstate(self.pre_model.c)
             pre_loss = self.pre_loss(pre_pred, teach)
 
             self.pre_optimizer.zero_grad()
             pre_loss.backward()
             self.pre_optimizer.step()
 
-            main_pred = self.main_model(pre_pred)
-            main_loss = self.main_loss(main_pred, teach)
+            main_pred = self.main_model(self.pre_model.c)
+            main_loss = self.main_loss(main_pred, pre_pred.detach().clone())
 
             self.main_optimizer.zero_grad()
             main_loss.backward()
@@ -47,10 +46,9 @@ class Study:
                 train, teach = self.create_randrange()
 
                 pre_pred = self.pre_model(train)
-                self.main_model.setstate(self.pre_model.c)
-                main_pred = self.main_model(pre_pred)
+                main_pred = self.main_model(self.pre_model.c)
 
-                self.test_loss += self.main_loss(main_pred, teach).item()
+                self.test_loss += self.main_loss(main_pred, pre_pred.detach().clone()).item()
 
                 for m, p, t in zip(main_pred.argmax(dim=1), pre_pred.argmax(dim=1), teach):
                     co, msum[m], prsum[p], ans = co+t[m], msum[m]+1, prsum[p]+1, ans+t

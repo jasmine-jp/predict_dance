@@ -18,13 +18,11 @@ class MainNetwork(nn.Module):
         )
 
     def forward(self, x):
-        p = x.reshape((len(ansmap)+1,batch,-1)).detach().clone()
-        self.r = torch.stack(list(map(self.arrange,self.rnn,p,ians))).sum(0)
+        self.c = x.detach().clone()
+        self.r = torch.stack(list(map(self.arrange,self.rnn,ians))).sum(0)
         return self.stack(self.r)
 
-    def arrange(self, r, p, i):
-        o, (self.hn[i],_) = r(self.c, (self.hn[i]*p,zeros))
+    def arrange(self, r, i):
+        o, hn = r(self.c, (self.hn[i],zeros))
+        self.hn[i] = nn.Parameter(hn[0])
         return o[:, :, -1]
-
-    def setstate(self, c):
-        self.c = c.detach().clone()
