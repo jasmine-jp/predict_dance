@@ -24,7 +24,7 @@ class PreNetwork(nn.Module):
             nn.ReLU(),
             nn.Linear(32, 32),
             nn.ReLU(),
-            nn.Linear(32, len(ansmap)+1),
+            nn.Linear(32, lenA),
             nn.Softmax(1)
         )
 
