@@ -4,7 +4,7 @@ from common import size, arr_size, ansmap
 
 def read(name, terdir):
     name = name.split('.')[0]
-    pkl = 'src/{}.pkl'.format(name)
+    pkl = 'out/src/{}.pkl'.format(name)
     video = '{}/{}.mp4'.format(terdir, name)
 
     cap = cv2.VideoCapture(video)
@@ -39,19 +39,19 @@ def all_read(name):
             teach = np.array([ansmap.get(s.split('_')[-1].replace('.mp4', ''), other) for _ in range(len(arr)-arr_size)])
             teachs = teach if teachs.size == 0 else np.append(teachs, teach, axis=0)
             plot = np.append(plot, len(data)-arr_size)
-        with open('out/{}_read.pkl'.format(name), 'wb') as f:
-            print('dumping '+'out/{}_read.pkl'.format(name))
+        with open('out/model/{}_read.pkl'.format(name), 'wb') as f:
+            print('dumping '+'out/model/{}_read.pkl'.format(name))
             pickle.dump((data, teachs, plot), f)
         return data, teachs, plot
     else:
-        with open('out/{}_read.pkl'.format(name), 'rb') as f:
-            print('loading '+'out/{}_read.pkl'.format(name))
+        with open('out/model/{}_read.pkl'.format(name), 'rb') as f:
+            print('loading '+'out/model/{}_read.pkl'.format(name))
             return pickle.load(f)
 
 def test_read():
     if input('read video data [y/n]: ') == 'y':
-        with open('out/video_read.pkl', 'rb') as f:
-            print('loading '+'out/video_read.pkl')
+        with open('out/model/video_read.pkl', 'rb') as f:
+            print('loading '+'out/model/video_read.pkl')
             return pickle.load(f)
     else:
         return all_read('test')

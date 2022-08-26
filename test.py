@@ -7,11 +7,10 @@ from common import arr_size, size
 from plot import plot
 # print('Input Size:', 10, arr_size, 3, size, size)
 # torchinfo.summary(PreNetwork(), (10, arr_size, 3, size, size))
+# torchinfo.summary(MainNetwork(), (10, arr_size, 1))
 
-pre_model, main_model = PreNetwork(), MainNetwork()
+s = lambda c: f'out/model/{c}.pth'
+pre_model, main_model = torch.load(s('pre_model')), torch.load(s('main_model'))
 study = Study(pre_model, main_model, test_read(), 750, plot(False))
-
-pre_model.load_state_dict(torch.load('out/pre_model.pth'))
-main_model.load_state_dict(torch.load('out/main_model.pth'))
 
 study.test()
