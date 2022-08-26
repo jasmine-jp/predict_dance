@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from common import *
 ians = range(lenA)
-zeros = torch.zeros((1, hidden))
+zeros = torch.zeros((1, batch, hidden))
 
 class NeuralNetwork(nn.Module):
     def __init__(self):
@@ -20,17 +20,9 @@ class NeuralNetwork(nn.Module):
             nn.Flatten()
         )
 
-        self.prestack = nn.Sequential(
-            nn.Flatten(),
-            nn.Linear(arr_size, 32),
-            nn.Tanh(),
-            nn.Linear(32, 32),
-            nn.Tanh(),
-            nn.Linear(32, lenA),
-            nn.Softmax(1)
+        self.rnn = nn.ModuleList(
+            [nn.LSTM(1, hidden, batch_first=True) for _ in ians]
         )
-
-        self.rnn = nn.ModuleList([nn.LSTM(1, hidden) for _ in ians])
         self.hn = nn.ParameterList([nn.Parameter(zeros) for _ in ians])
 
         self.stack = nn.Sequential(
@@ -39,11 +31,10 @@ class NeuralNetwork(nn.Module):
 
     def forward(self, x):
         self.c = torch.stack(list(map(self.conv2d, x)))
-        self.pre = self.prestack(self.c).argmax(dim=1)
-        self.r = torch.stack(list(map(self.arrange, self.pre, self.c)))
+        self.r = torch.stack(list(map(self.arrange, self.rnn, ians))).sum(0)
         return self.stack(self.r)
 
-    def arrange(self, p, e):
-        o, (hn, _) = self.rnn[p](e, (self.hn[p], zeros))
-        self.hn[p] = nn.Parameter(hn)
-        return o[:, -1]
+    def arrange(self, r, i):
+        o, hc = r(self.c, (self.hn[i], zeros))
+        self.hn[i] = nn.Parameter(hc[0])
+        return o[:, :, -1]

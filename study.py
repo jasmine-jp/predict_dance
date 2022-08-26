@@ -11,7 +11,7 @@ class Study:
         self.diff = np.array([len(self.teach)-diff, diff])/batch
 
     def train(self):
-        self.p.test, stk = False, torch.zeros(lenA)
+        self.p.test = False
         print('train')
 
         for i in tqdm(range(int(self.diff[0]))):
@@ -19,17 +19,12 @@ class Study:
             pred = self.model(train)
             loss = self.loss_fn(pred, teach)
 
-            for p in self.model.pre:
-                stk[p] += 1
-
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
             if ((i+1) % 300 == 0 or i == 0) and self.p.execute:
                 self.p.saveimg(self.model, teach, i+1)
-
-        print(f'Pre: {list(map(int, stk))}')
 
     def test(self):
         self.test_loss, self.p.test, co, d = 0, True, 0, int(self.diff[1])
