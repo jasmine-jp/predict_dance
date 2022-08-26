@@ -18,4 +18,4 @@ class plot:
         ax2.plot(list(map(float, rnn)))
         s = 'test' if self.test else 'epoch_'+str(self.epoch)
         plt.close(fig)
-        fig.savefig(f'img/{s}/estimate_{idx}')
+        fig.savefig(f'out/img/{s}/estimate_{idx}')

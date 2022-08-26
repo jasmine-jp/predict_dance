@@ -7,6 +7,7 @@ zeros = torch.zeros((1, batch, hidden))
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
+        self.s = 'train'
 
         self.conv2d = nn.Sequential(
             nn.Conv2d(3, channel, second, second),
@@ -36,5 +37,9 @@ class NeuralNetwork(nn.Module):
 
     def arrange(self, r, i):
         o, hc = r(self.c, (self.hn[i], zeros))
-        self.hn[i] = nn.Parameter(hc[0])
+        if self.s == 'train':
+            self.hn[i] = nn.Parameter(hc[0])
         return o[:, :, -1]
+    
+    def setstate(self, s):
+        self.s = s

@@ -7,9 +7,7 @@ from plot import plot
 # print('Input Size:', 10, arr_size, 3, size, size)
 # torchinfo.summary(NeuralNetwork(), (10, arr_size, 3, size, size))
 
-model = NeuralNetwork()
+model = torch.load('out/model/model_weights.pth')
 study = Study(model, test_read(), 750, plot(False))
-
-model.load_state_dict(torch.load('out/model_weights.pth'))
 
 study.test()
