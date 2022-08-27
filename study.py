@@ -4,9 +4,9 @@ from common import arr_size, lenA, batch
 
 class Study:
     def __init__(self, pre_model, main_model, read, diff, p):
-        self.pre_loss = torch.nn.BCEWithLogitsLoss()
+        self.pre_loss = torch.nn.HuberLoss()
         self.pre_optimizer = torch.optim.RAdam(pre_model.parameters())
-        self.main_loss = torch.nn.SmoothL1Loss()
+        self.main_loss = torch.nn.HuberLoss()
         self.main_optimizer = torch.optim.RAdam(main_model.parameters())
         self.pre_model, self.main_model, self.p = pre_model, main_model, p
         self.data, self.teach, self.plot = read
@@ -21,13 +21,13 @@ class Study:
 
             pre_pred = self.pre_model(train)
             pre_loss = self.pre_loss(pre_pred, teach)
-            self.main_model.setstate('train', self.pre_model.c)
+            self.main_model.setstate(pre_loss)
 
             self.pre_optimizer.zero_grad()
             pre_loss.backward()
             self.pre_optimizer.step()
 
-            main_pred = self.main_model(pre_pred)
+            main_pred = self.main_model(self.pre_model.c)
             main_loss = self.main_loss(main_pred, teach)
 
             self.main_optimizer.zero_grad()
@@ -38,7 +38,8 @@ class Study:
                 self.p.saveimg(self.pre_model.c, self.main_model.r, teach, i)
 
     def test(self):
-        self.test_loss, self.p.test, co, d = 0, True, 0, int(self.diff[1])
+        self.p.test, d = True, int(self.diff[1])
+        self.test_loss, pre_loss, co = 0, 0, 0
         msum, prsum, ans = [torch.zeros(lenA) for _ in range(3)]
         print('test')
 
@@ -47,9 +48,10 @@ class Study:
                 train, teach = self.create_randrange()
 
                 pre_pred = self.pre_model(train)
-                self.main_model.setstate('test', self.pre_model.c)
-                main_pred = self.main_model(pre_pred)
+                self.main_model.setstate()
+                main_pred = self.main_model(self.pre_model.c)
 
+                pre_loss += self.pre_loss(pre_pred, teach).item()
                 self.test_loss += self.main_loss(main_pred, teach).item()
 
                 for m, p, t in zip(main_pred.argmax(dim=1), pre_pred.argmax(dim=1), teach):
@@ -58,8 +60,8 @@ class Study:
                 if (i % 100 == 0 or i == 1) and self.p.execute:
                     self.p.saveimg(self.pre_model.c, self.main_model.r, teach, i)
 
-            self.test_loss, co = self.test_loss/d, co/d/batch
-            print(f'Accuracy: {(100*co):>0.1f}%, Avg loss: {self.test_loss:>8f}')
+            self.test_loss, pre_loss, co = self.test_loss/d, pre_loss/d, co/d/batch
+            print(f'Main: {(100*co):>0.1f}%, Main loss: {self.test_loss:>8f}, Pre loss: {pre_loss:>8f}')
             print(f'Main: {list(map(int,msum))}, Pre: {list(map(int,prsum))}, Ans: {list(map(int,ans))}')
 
     def create_randrange(self):
