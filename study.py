@@ -21,7 +21,7 @@ class Study:
 
             pre_pred = self.pre_model(train)
             pre_loss = self.pre_loss(pre_pred, teach)
-            self.main_model.setstate(pre_loss)
+            self.main_model.setstate('train')
 
             self.pre_optimizer.zero_grad()
             pre_loss.backward()
@@ -48,7 +48,7 @@ class Study:
                 train, teach = self.create_randrange()
 
                 pre_pred = self.pre_model(train)
-                self.main_model.setstate()
+                self.main_model.setstate('test')
                 main_pred = self.main_model(self.pre_model.c)
 
                 pre_loss += self.pre_loss(pre_pred, teach).item()
