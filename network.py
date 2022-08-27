@@ -24,7 +24,7 @@ class NeuralNetwork(nn.Module):
         self.rnn = nn.ModuleList(
             [nn.LSTM(1, hidden, batch_first=True) for _ in ians]
         )
-        self.hn = nn.ParameterList([nn.Parameter(zeros) for _ in ians])
+        self.hn = nn.ParameterList([nn.Parameter(zeros, False) for _ in ians])
 
         self.stack = nn.Sequential(
             nn.Linear(arr_size, lenA)
@@ -37,8 +37,7 @@ class NeuralNetwork(nn.Module):
 
     def arrange(self, r, i):
         o, hc = r(self.c, (self.hn[i], zeros))
-        if self.s == 'train':
-            self.hn[i] = nn.Parameter(hc[0])
+        self.hn[i].data = hc[0] if self.s == 'train' else self.hn[i]
         return o[:, :, -1]
     
     def setstate(self, s):

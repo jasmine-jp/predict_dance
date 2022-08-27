@@ -28,7 +28,8 @@ class Study:
                 self.p.saveimg(self.model, teach, i+1)
 
     def test(self):
-        self.test_loss, self.p.test, co, d = 0, True, 0, int(self.diff[1])
+        self.p.test, d = True, int(self.diff[1])
+        self.test_loss, co = 0, 0
         psum, ans = [torch.zeros(lenA) for _ in range(2)]
         print('test')
 
