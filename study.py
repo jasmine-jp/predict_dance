@@ -4,7 +4,7 @@ from common import arr_size, lenA, batch
 
 class Study:
     def __init__(self, pre_model, main_model, read, diff, p):
-        self.pre_loss = torch.nn.HuberLoss()
+        self.pre_loss = torch.nn.CrossEntropyLoss()
         self.pre_optimizer = torch.optim.RAdam(pre_model.parameters())
         self.main_loss = torch.nn.HuberLoss()
         self.main_optimizer = torch.optim.RAdam(main_model.parameters())
@@ -22,16 +22,15 @@ class Study:
             pre_pred = self.pre_model(train)
             pre_loss = self.pre_loss(pre_pred, teach)
             self.main_model.setstate('train')
-
             self.pre_optimizer.zero_grad()
-            pre_loss.backward()
-            self.pre_optimizer.step()
+            self.main_optimizer.zero_grad()
 
             main_pred = self.main_model(self.pre_model.c)
-            main_loss = self.main_loss(main_pred, teach)
+            main_loss = self.main_loss(main_pred, pre_pred)
 
-            self.main_optimizer.zero_grad()
-            main_loss.backward()
+            pre_loss.backward(retain_graph=True)
+            main_loss.backward(retain_graph=True)
+            self.pre_optimizer.step()
             self.main_optimizer.step()
 
             if (i % 300 == 0 or i == 1) and self.p.execute:
