@@ -19,14 +19,15 @@ class MainNetwork(nn.Module):
         )
 
     def forward(self, x):
-        self.c = x.detach().clone()
-        self.r = torch.stack(list(map(self.arrange,self.rnn,ians))).sum(0)
+        p = x.detach().clone().reshape((lenA,batch,1,1))
+        self.r = torch.stack(list(map(self.arrange,self.rnn,p,ians))).sum(0)
         return self.stack(self.r)
 
-    def arrange(self, r, i):
-        o, hc = r(self.c, (self.hn[i],zeros))
+    def arrange(self, r, p, i):
+        o, hc = r(self.c*p, (self.hn[i],zeros))
         self.hn[i].data = hc[0] if self.s == 'train' else self.hn[i]
         return o[:, :, -1]
 
-    def setstate(self, s):
+    def setstate(self, s, c):
         self.s = s
+        self.c = c.detach().clone()

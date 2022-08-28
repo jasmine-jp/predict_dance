@@ -15,9 +15,9 @@ for t in range(epochs):
     study.p.epoch = t+1
     study.train()
     study.test()
-    if loss > study.test_loss:
+    if loss > study.avgloss:
         print('Saving PyTorch Model State')
         torch.save(pre_model, 'out/model/pre_model.pth')
         torch.save(main_model, 'out/model/main_model.pth')
-        loss = study.test_loss
+        loss = study.avgloss
 print(f'final loss: {loss}')

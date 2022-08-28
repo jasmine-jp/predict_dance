@@ -7,7 +7,7 @@ class PreNetwork(nn.Module):
         super().__init__()
 
         self.conv2d = nn.Sequential(
-            nn.Conv2d(3, channel, second, second),
+            nn.Conv2d(lenA, channel, second, second),
             nn.BatchNorm2d(channel),
             nn.ReLU(),
             nn.MaxPool2d(pool),
