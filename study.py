@@ -26,8 +26,8 @@ class Study:
             pre_loss.backward()
             self.pre_optimizer.step()
 
-            self.main_model.setstate('train', self.pre_model.c)
-            main_pred = self.main_model(pre_pred)
+            self.main_model.setstate('train')
+            main_pred = self.main_model(self.pre_model.c)
             main_loss = self.main_loss(main_pred, teach)
 
             self.main_optimizer.zero_grad()
@@ -50,8 +50,8 @@ class Study:
                 pre_pred = self.pre_model(train)
                 pre_loss += self.pre_loss(pre_pred, teach).item()
 
-                self.main_model.setstate('test', self.pre_model.c)
-                main_pred = self.main_model(pre_pred)
+                self.main_model.setstate('test')
+                main_pred = self.main_model(self.pre_model.c)
                 self.avgloss += self.main_loss(main_pred, teach).item()
 
                 for m, p, t in zip(main_pred.argmax(dim=1), pre_pred.argmax(dim=1), teach):
