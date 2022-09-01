@@ -1,0 +1,8 @@
+torch
+numpy
+pickle
+opencv-python
+matplotlib
+sympy
+tqdm
+torchinfo
