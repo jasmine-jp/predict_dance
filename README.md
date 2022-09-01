@@ -40,7 +40,7 @@ python main.py
 python test.py
 ```
 
-you can modify code everything. plz read my code and be become better!<br>
+you can modify code everything. plz read my code and improve better!<br>
 I show you recent nn for help.
 ## flow chart
 ![flowchart](./flowchart.png)
