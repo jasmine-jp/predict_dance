@@ -7,7 +7,7 @@ from common import arr_size, size, batch, lenA
 from plot import plot
 # print('Input Size:', batch, arr_size, lenA, size, size)
 # torchinfo.summary(PreNetwork(), (batch, arr_size, lenA, size, size))
-# torchinfo.summary(MainNetwork(), (batch, arr_size, 1))
+# torchinfo.summary(MainNetwork(), (batch, lenA))
 
 load = lambda c: torch.load(f'out/model/{c}_model.pth')
 pre_model, main_model = load('pre'), load('main')
